@@ -1,0 +1,57 @@
+from pipeline import pipeline_a, pipeline_b, pipeline_c, pipeline_d, pipeline_e
+
+# Path to your text file
+file_path = "dataset/mycourses/lec1.txt"
+
+def main():
+    print("Starting Preprocessing...\n")
+
+    # Run Pipeline A: Minimalist Preprocessing
+    result_a = pipeline_a(file_path)
+    print("\nPipeline A (Minimalist Preprocessing) Output:")
+    for sentence in result_a["raw_sentences"]:
+        print(f"- {sentence}")
+
+    # Run Pipeline B: Minimal Preprocessing with TF-IDF
+    result_b = pipeline_b(file_path)
+    print("\nPipeline B (Minimal Preprocessing with TF-IDF) Output:")
+    print("TF-IDF Keywords:", result_b["keywords"])
+    print("Segmented Sentences:")
+    for sentence in result_b["sentences"]:
+        print(f"- {sentence}")
+
+    # Run Pipeline C: Semantic Preprocessing with Grouping
+    result_c = pipeline_c(file_path)
+    print("\nPipeline C (Semantic Preprocessing with Grouping) Output:")
+    print("Simplified Sentences:")
+    for sentence in result_c["simplified_sentences"]:
+        print(f"- {sentence}")
+    print("Topics:")
+    for topic, sentences in result_c["topics"].items():
+        print(f"{topic}:")
+        for sentence in sentences:
+            print(f"  - {sentence}")
+
+    # Run Pipeline D: Aggressive Preprocessing with Stemming
+    result_d = pipeline_d(file_path)
+    print("\nPipeline D (Aggressive Preprocessing with Stemming) Output:")
+    print("Stemmed Tokens:", result_d["stemmed_tokens"])
+    print("TF-IDF Keywords:", result_d["keywords"])
+
+    # Run Pipeline E: Contextual Preprocessing for Structured Themes
+    result_e = pipeline_e(file_path)
+    print("\nPipeline E (Contextual Preprocessing for Structured Themes) Output:")
+    print("Simplified Sentences:")
+    for sentence in result_e["simplified_sentences"]:
+        print(f"- {sentence}")
+    print("Topics:")
+    for topic, sentences in result_e["topics"].items():
+        print(f"{topic}:")
+        for sentence in sentences:
+            print(f"  - {sentence}")
+    print("TF-IDF Keywords:", result_e["keywords"])
+
+    print("\nPreprocessing Complete!")
+
+if __name__ == "__main__":
+    main()

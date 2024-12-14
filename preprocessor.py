@@ -93,7 +93,6 @@ class PreProcessor:
         return {
             "keywords": keyword_list, "thematic_sections": thematic_sections, "cleaned_text": cleaned_text
         }
-   
 
 # IMPLEMENTED PREPROCESSING TECHNIQUES
 """
@@ -105,4 +104,7 @@ class PreProcessor:
 6. TF-IDF to extract important keywords, could be tweaked
 7. Topic Based Grouping by clustering sentences intp topics using LDA. Not sure if Danielle meant something like this when she talked about chunks
 8. Removing Special Chars
+
+
+
 """   
