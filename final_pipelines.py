@@ -111,7 +111,7 @@ def pipeline_fixed_chunks(file_path, chunk_size):
     valid_chunks = preprocessor.check_token_limit(chunks)
     return valid_chunks
 
-def pipeline_topic_based(file_path, n_topics=5):
+def pipeline_topic_based(file_path, n_topics=5): # number of topics per lecture 
     """ Noise removal + topic-based grouping with token limit enforcement. """
     preprocessor = PreProcessor()
     with open(file_path, 'r', encoding='utf-8') as file:
