@@ -1,6 +1,6 @@
 import os
 import json
-from coverage import evaluate_coverage
+from semantic import evaluate_semantic
 from compression import evaluate_compression
 
 ORIGINALS_DIR = "dataset/preprocessed/C"
@@ -43,13 +43,13 @@ def main():
             summary_text = load_summary_text(summary_path)
 
             # Calculate metrics
-            coverage_scores = evaluate_coverage(original_text, summary_text)
+            semantic_scores = evaluate_semantic(original_text, summary_text)
             compression_scores = evaluate_compression(original_text, summary_text)
 
             # Combine results
             combined_result = {
                 "file": base_name,
-                **coverage_scores,
+                **semantic_scores,
                 **compression_scores
             }
             results.append(combined_result)
@@ -61,16 +61,19 @@ def main():
 
     # Write results to file
     with open(RESULTS_FILE, "w", encoding="utf-8") as f:
-        f.write("file,keyphrase_coverage_score,compression_score\n")
+        # Updated header to include all metrics
+        f.write("file,document_similarity,sentence_similarity,compression_score\n")
         for r in results:
-            f.write(f"{r['file']},{r['keyphrase_coverage_score']:.4f},{r['compression_score']:.4f}\n")
+            f.write(f"{r['file']},{r['document_similarity']:.4f},{r['sentence_similarity']:.4f},{r['compression_score']:.4f}\n")
 
     # Print average scores
     if results:
-        avg_coverage = sum(r['keyphrase_coverage_score'] for r in results) / len(results)
+        avg_doc_sim = sum(r['document_similarity'] for r in results) / len(results)
+        avg_sent_sim = sum(r['sentence_similarity'] for r in results) / len(results)
         avg_compression = sum(r['compression_score'] for r in results) / len(results)
         print(f"\nAverage Scores across {len(results)} lectures:")
-        print(f"Coverage Score: {avg_coverage:.4f}")
+        print(f"Document Similarity: {avg_doc_sim:.4f}")
+        print(f"Sentence Similarity: {avg_sent_sim:.4f}")
         print(f"Compression Score: {avg_compression:.4f}")
 
 if __name__ == "__main__":
