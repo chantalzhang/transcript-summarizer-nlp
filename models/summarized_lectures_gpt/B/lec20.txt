@@ -1,0 +1,13 @@
+In this lecture, Professor Jackie Cheung discusses discourse and co-reference resolution. He emphasizes the importance of analyzing language beyond the sentence level, as natural language often occurs in larger chunks. He introduces the concept of monologue and dialogue and explains the difference between coherence and cohesion in discourse analysis. He also discusses the use of lexical cohesion and co-reference chains in writing. 
+
+The lecture then shifts focus to the concept of co-reference, which is related to the dichotomy between language and the things in the world that this language points to. The lecture introduces referring expressions, also known as mentions, which are elements in language that point to something else. 
+
+The lecture also covers the phenomenon of 'zero anaphora' or 'pro-drop' in certain languages, where pronouns can be omitted in certain contexts. The lecture ends with a mention of bridging reference, where entities not directly introduced can be inferred from context or background knowledge. 
+
+The lecture focuses on the concept of co-reference resolution, specifically pronominal anaphora resolution, which involves determining the antecedents of pronouns. The lecturer introduces Hobbes Algorithm from the 1970s as a basic algorithm for this task, and discusses the use of machine learning approaches for the same purpose. 
+
+The lecture discusses the concept of co-reference resolution in machine learning. The accuracy of this approach is estimated to be around 50-60%, but this is a rough estimate and actual studies have been conducted to determine the exact figures. Co-reference resolution is typically solved using a statistical approach, broken down into two subproblems: mention detection and creating links for reference resolution. 
+
+Two general types of models are discussed. The first model is an encoder model, which replaces the LSTM part with a pre-trained transformer. This model encodes the sequence and frames the steps in co-reference resolution. The second type of model is a decoder model, which frames co-reference resolution as a sequence-to-sequence task. 
+
+A comparison of these models by a PhD student, Ian Parada, found that encoder models tend to be more efficient and perform better, especially when the size of the large language model and the pre-trained language model are controlled for, and proper parameter optimization is done. However, decoder models are still considered interesting and promising.

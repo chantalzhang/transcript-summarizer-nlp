@@ -1,0 +1,15 @@
+In this lecture, Professor Jackie Cheung discusses the field of Natural Language Generation (NLG), covering various approaches and methodologies. He introduces two categories of NLG: data to text generation and text to text generation, and discusses the importance of rule-based systems and machine learning systems in NLG. He also covers the concept of automatic summarization, contrasting extractive summarization with abstractive summarization. 
+
+The lecture discusses the role of NLG in synthesizing and abstracting opinions and thoughts, and contrasts it with Natural Language Understanding (NLU). It also mentions the use of 'canned text' in video games and the importance of templates and rules in systems like GPS. 
+
+The lecture then delves into the architecture of NLG systems, explaining the concept of slots and slot fillers in a template and outlining four steps in a potential NLG system: content selection, document structuring, micro planning, and surface realization. 
+
+The lecture also touches on argumentation theory, the process of selecting specific lexical items for generating the final output, and the process of generating sentences from detailed semantic structures. 
+
+The lecture discusses the pros and cons of structured, rule-based approaches versus more flexible ones in NLG. It also discusses the neural approach to NLG, which condenses everything into a conditional language model without separate modeling for each step. 
+
+The lecture then discusses the use of neural language models in data to text and text to text generation, and introduces the concept of integer linear programming, a method used in Natural Language Processing (NLP). 
+
+The lecture concludes by discussing the importance of controllability in AI systems and various techniques and tools used to control AI systems, including the use of control tokens and unlikelihood training. The lecture also mentions the potential for AI models to reveal information they have been exposed to, and two major trends in addressing this issue: reinforcement learning and human feedback. 
+
+The lecture concludes with an announcement of two upcoming lectures: one on the evaluation of NLP systems and another guest lecture on a topic related to natural language generation.
