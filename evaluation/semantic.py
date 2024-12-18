@@ -27,6 +27,8 @@ def evaluate_semantic(original_text: str, summary_text: str, model_name: str = "
     model = SentenceTransformer(model_name)
     
     # Document-level similarity
+
+    
     doc_similarity = calculate_semantic_similarity(original_text, summary_text, model)
     
     # Sentence-level similarity
