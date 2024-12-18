@@ -1,5 +1,5 @@
 import os
-from preprocessor import PreProcessor 
+from old_unused_code.preprocessor import PreProcessor 
 
 if __name__ == "__main__":
     transcript_path = "dataset/mycourses/lec4.txt" 
