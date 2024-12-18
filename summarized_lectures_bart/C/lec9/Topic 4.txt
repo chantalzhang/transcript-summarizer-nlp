@@ -1,0 +1,1 @@
+Tikka uses conditional random fields to improve performance. You can combine it with Crm by just appending the Crf layer to the the last layer of your network. The idea for any error is that you need to detect spams of multiple words that are relevant to the entity.

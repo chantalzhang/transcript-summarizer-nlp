@@ -1,0 +1,1 @@
+Test classification is a form of machine learning. It's a way of learning how to cluster data into different categories. The idea of training is that you want to select the hyperparameter that minimize the error on your training data. You maximize the likelihood, but you minimize theerror.
