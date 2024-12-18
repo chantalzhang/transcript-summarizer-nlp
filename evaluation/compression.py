@@ -1,24 +1,13 @@
-import json
-
-def load_preprocessed_json(file_path):
-    """Load preprocessed sentences from a JSON file."""
-    with open(file_path, "r", encoding="utf-8") as file:
-        return json.load(file)
-
-def compute_compression_ratio(preprocessed_sentences, summary):
+def evaluate_compression(original_text, summary_text):
     """
-    Compute the compression ratio of a summary compared to preprocessed sentences.
-    Compression Ratio = Total Words in Source / Total Words in Summary
+    Calculate compression ratio between original text and summary.
+    Returns a score representing how concise the summary is (lower is more concise).
     """
-    source_word_count = sum(len(sentence.split()) for sentence in preprocessed_sentences)
-    summary_word_count = len(summary.split())
-    return source_word_count / summary_word_count
-
-def compression_ratio_evaluation(preprocessed_file, summary):
-    """
-    Run compression ratio evaluation on a summary.
-    """
-    preprocessed_sentences = load_preprocessed_json(preprocessed_file)
-    compression_ratio = compute_compression_ratio(preprocessed_sentences, summary)
-
-    return {"Compression Ratio": round(compression_ratio, 2)}
+    original_words = len(original_text.split())
+    summary_words = len(summary_text.split())
+    
+    if original_words == 0:
+        return {"compression_score": 0.0}
+    
+    compression_ratio = summary_words / original_words
+    return {"compression_score": compression_ratio} 
