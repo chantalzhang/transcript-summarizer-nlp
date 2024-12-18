@@ -1,11 +1,13 @@
 import os
 import json
-from transformers import BartTokenizer, BartForConditionalGeneration
+from transformers import BartTokenizer, BartForConditionalGeneration, AutoTokenizer, AutoModelForSeq2SeqLM
 
-# Initialize the BART model and tokenizer
-model_name = "facebook/bart-large-cnn"
-tokenizer = BartTokenizer.from_pretrained(model_name)
-model = BartForConditionalGeneration.from_pretrained(model_name)
+# model_name = "facebook/bart-large-cnn"
+# tokenizer = BartTokenizer.from_pretrained(model_name)
+# model = BartForConditionalGeneration.from_pretrained(model_name)
+model_name = "t5-base"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
 # Directory paths
 data_paths = {
@@ -108,4 +110,4 @@ def process_and_save_summaries(data_paths, output_dir="summarized_lectures"):
             save_summaries_by_topic(topic_summaries, method_output_dir, lecture_name)
 
 # Run the summarization process
-process_and_save_summaries(data_paths, "summarized_lectures_bart")
+process_and_save_summaries(data_paths, "summarized_lectures_t5")

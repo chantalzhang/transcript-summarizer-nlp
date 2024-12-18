@@ -1,14 +1,17 @@
 import os
 import json
-from transformers import BartTokenizer, BartForConditionalGeneration, AutoTokenizer, AutoModelForSeq2SeqLM
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from huggingface_hub import HfApi
+from dotenv import load_dotenv
+import os
 
-# Initialize the model and tokenizer
-# model_name = "facebook/bart-large-cnn"
-# tokenizer = BartTokenizer.from_pretrained(model_name)
-# model = BartForConditionalGeneration.from_pretrained(model_name)
-model_name = "t5-base"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+load_dotenv()
+
+access_token = os.getenv("HF_KEY")
+model_name = "meta-llama/Llama-3.3-70B-Instruct"
+tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=access_token)
+model = AutoModelForCausalLM.from_pretrained(model_name, use_auth_token=access_token, device_map="auto", torch_dtype="auto")
 
 # Directory paths
 data_paths = {
@@ -35,36 +38,28 @@ def split_into_chunks(text, max_tokens=1024):
 
     for word in words:
         current_chunk.append(word)
-        # Check if the current chunk exceeds the max_tokens limit
+        # check if the current chunk exceeds the max_tokens limit
         if len(tokenizer.tokenize(' '.join(current_chunk))) >= max_tokens:
             # Remove the last word to fit within the limit
             current_chunk.pop()
             chunks.append(' '.join(current_chunk))
             current_chunk = [word]
 
-    # Add any remaining words as the last chunk
+    # add any remaining words as the last chunk
     if current_chunk:
         chunks.append(' '.join(current_chunk))
 
     return chunks
 
-def summarize_with_bart(text, max_length=150, min_length=50):
+def summarize_text(text, max_length=150):
     """
-    Summarize text using the summarization model.
+    Summarize text using the Llama model.
     """
-    inputs = tokenizer(
-        text,
-        truncation=True,
-        max_length=1024, 
-        padding="longest",
-        return_tensors="pt"
-    )
+    prompt = f"Summarize the following text:\n\n{text}\n\nSummary:"
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     summary_ids = model.generate(
         inputs["input_ids"],
-        attention_mask=inputs["attention_mask"],
         max_length=max_length,
-        min_length=min_length,
-        length_penalty=2.0,
         num_beams=4,
         early_stopping=True
     )
@@ -79,21 +74,21 @@ def summarize_lecture_chunks(lecture_chunks):
         print("Summarizing chunk...")
         text_chunks = split_into_chunks(chunk)
         for text_chunk in text_chunks:
-            chunk_summary = summarize_with_bart(text_chunk)
+            chunk_summary = summarize_text(text_chunk)
             chunk_summaries.append(chunk_summary)
             chunk_summary += "\n"
 
     combined_summary = " ".join(chunk_summaries)
 
     # If the combined summary is too long, summarize it again
-    # if len(tokenizer.tokenize(combined_summary)) > 1024:
-    #     final_summary = summarize_with_bart(combined_summary)
-    # else:
-    final_summary = combined_summary
+    if len(tokenizer.tokenize(combined_summary)) > 1024:
+        final_summary = summarize_text(combined_summary)
+    else:
+        final_summary = combined_summary
 
     return final_summary
 
-def process_and_save_summaries(data_paths, output_dir="summarized_lectures"):
+def process_and_save_summaries(data_paths, output_dir="summarized_lectures_llama"):
     """
     Process all JSON files in the data_paths, summarize lectures, and save results.
     """
@@ -119,4 +114,4 @@ def process_and_save_summaries(data_paths, output_dir="summarized_lectures"):
             print(f"Saved summary for lecture: {lecture_name} to {lecture_file_path}")
 
 # Run the summarization process
-process_and_save_summaries(data_paths, "summarized_lectures_t5")
+process_and_save_summaries(data_paths)
