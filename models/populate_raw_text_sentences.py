@@ -25,8 +25,6 @@ client = weaviate.connect_to_weaviate_cloud(
     headers=headers
 )
 
-
-
 def process_and_insert_sentences(data_dir, collection_name):
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".txt"):

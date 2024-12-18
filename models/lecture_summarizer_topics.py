@@ -9,7 +9,6 @@ model = BartForConditionalGeneration.from_pretrained(model_name)
 
 # Directory paths
 data_paths = {
-    "B": "../dataset/preprocessed/B/30",  # Chunk-level
     "C": "../dataset/preprocessed/C",     # Topic-level
 }
 
@@ -24,36 +23,29 @@ def load_preprocessed_data(directory):
     return data
 
 def split_into_chunks(text, max_tokens=1024):
-    """
-    Split the input text into chunks of a specified maximum number of tokens.
-    """
+    """Split the input text into chunks."""
     words = text.split()
     chunks = []
     current_chunk = []
 
     for word in words:
         current_chunk.append(word)
-        # Check if the current chunk exceeds the max_tokens limit
         if len(tokenizer.tokenize(' '.join(current_chunk))) >= max_tokens:
-            # Remove the last word to fit within the limit
             current_chunk.pop()
             chunks.append(' '.join(current_chunk))
             current_chunk = [word]
 
-    # Add any remaining words as the last chunk
     if current_chunk:
         chunks.append(' '.join(current_chunk))
 
     return chunks
 
 def summarize_with_bart(text, max_length=150, min_length=50):
-    """
-    Summarize text using the BART model.
-    """
+    """Summarize text using the BART model."""
     inputs = tokenizer(
         text,
         truncation=True,
-        max_length=1024,  # Explicitly set max_length to the model's maximum input length
+        max_length=1024,
         padding="longest",
         return_tensors="pt"
     )
@@ -68,53 +60,52 @@ def summarize_with_bart(text, max_length=150, min_length=50):
     )
     return tokenizer.decode(summary_ids[0], skip_special_tokens=True)
 
-def summarize_lecture_chunks(lecture_chunks):
-    """
-    Summarize a list of text chunks for a lecture and combine the summaries.
-    """
-    chunk_summaries = []
-    for chunk in lecture_chunks:
+def summarize_topic(topic_data):
+    """Summarize all chunks within a topic."""
+    combined_summary = []
+    for chunk in topic_data:
         print("Summarizing chunk...")
-        text_chunks = split_into_chunks(chunk)
-        for text_chunk in text_chunks:
-            chunk_summary = summarize_with_bart(text_chunk)
-            chunk_summaries.append(chunk_summary)
-            chunk_summary += "\n"
+        chunk_chunks = split_into_chunks(chunk)
+        for sub_chunk in chunk_chunks:
+            summary = summarize_with_bart(sub_chunk)
+            combined_summary.append(summary)
+    return " ".join(combined_summary)
 
-    combined_summary = " ".join(chunk_summaries)
+def summarize_lecture_by_topics(lecture_data):
+    """Summarize lecture data organized by topics."""
+    topic_summaries = {}
+    for topic, chunks in lecture_data.items():
+        print(f"Summarizing topic: {topic}...")
+        topic_summary = summarize_topic(chunks)
+        topic_summaries[topic] = topic_summary
+    return topic_summaries
 
-    # If the combined summary is too long, summarize it again
-    # if len(tokenizer.tokenize(combined_summary)) > 1024:
-    #     final_summary = summarize_with_bart(combined_summary)
-    # else:
-    final_summary = combined_summary
+def save_summaries_by_topic(summaries, output_dir, lecture_name):
+    """Save summaries by topic to text files."""
+    lecture_dir = os.path.join(output_dir, lecture_name)
+    os.makedirs(lecture_dir, exist_ok=True)
 
-    return final_summary
+    for topic, summary in summaries.items():
+        topic_file_path = os.path.join(lecture_dir, f"{topic}.txt")
+        with open(topic_file_path, "w", encoding="utf-8") as f:
+            f.write(summary)
+        print(f"Saved summary for topic: {topic} to {topic_file_path}")
 
 def process_and_save_summaries(data_paths, output_dir="summarized_lectures"):
-    """
-    Process all JSON files in the data_paths, summarize lectures, and save results.
-    """
+    """Process all JSON files, summarize by topic, and save results."""
     os.makedirs(output_dir, exist_ok=True)
 
     for method, directory in data_paths.items():
         print(f"Processing directory: {directory}...")
         data = load_preprocessed_data(directory)
 
-        # Create a subdirectory for each method
         method_output_dir = os.path.join(output_dir, method)
         os.makedirs(method_output_dir, exist_ok=True)
 
-        for lecture_name, chunks in data.items():
+        for lecture_name, lecture_data in data.items():
             print(f"Summarizing lecture: {lecture_name}...")
-            lecture_summary = summarize_lecture_chunks(chunks)
-
-            # Save the summary as a text file
-            lecture_file_path = os.path.join(method_output_dir, f"{lecture_name}.txt")
-            with open(lecture_file_path, "w", encoding="utf-8") as f:
-                f.write(lecture_summary)
-
-            print(f"Saved summary for lecture: {lecture_name} to {lecture_file_path}")
+            topic_summaries = summarize_lecture_by_topics(lecture_data)
+            save_summaries_by_topic(topic_summaries, method_output_dir, lecture_name)
 
 # Run the summarization process
 process_and_save_summaries(data_paths, "summarized_lectures_bart")

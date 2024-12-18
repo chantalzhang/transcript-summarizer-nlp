@@ -13,13 +13,13 @@ openai_key = os.getenv("OPENAI_KEY")
 huggingface_key = os.getenv("HF_KEY")
 
 # Set the headers for Hugging Face API
-# headers = {
-#     "X-HuggingFace-Api-Key": huggingface_key,
-# }
-
 headers = {
-    "X-OpenAI-Api-Key": openai_key,
+    "X-HuggingFace-Api-Key": huggingface_key,
 }
+
+# headers = {
+#     "X-OpenAI-Api-Key": openai_key,
+# }
 
 # Connect to a WCS instance
 client = weaviate.connect_to_weaviate_cloud(
@@ -34,6 +34,7 @@ try:
         properties=[
             wc.Property(name="chunk", data_type=wc.DataType.TEXT),
             wc.Property(name="lecture_name", data_type=wc.DataType.TEXT),
+            wc.Propert(name="id", data_type=wc.DataType.INT)
         ],
         # Define & configure the vectorizer module
         vectorizer_config=[
