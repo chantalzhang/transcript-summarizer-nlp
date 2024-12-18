@@ -1,47 +1,67 @@
-from keybert import KeyBERT
-from sentence_transformers import SentenceTransformer
-import numpy as np
+from nltk import ngrams
+from collections import Counter
+import nltk
 
-def extract_key_phrases(text, top_n_percent=1.0):
-    """Extract key phrases from text using KeyBERT."""
-    kw_model = KeyBERT()
-    # Extract twice as many keywords as needed, then take top n%
-    keywords = kw_model.extract_keywords(text, 
-                                       keyphrase_ngram_range=(1, 3),
-                                       stop_words='english',
-                                       use_maxsum=True,
-                                       nr_candidates=20)
-    
-    # Sort by score and take top n%
-    keywords.sort(key=lambda x: x[1], reverse=True)
-    num_to_keep = max(1, int(len(keywords) * top_n_percent))
-    return [kw[0] for kw in keywords[:num_to_keep]]
+# Download required NLTK data
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
 
-def calculate_semantic_similarity(text1, text2, model_name='all-MiniLM-L6-v2'):
-    """Calculate semantic similarity between two texts using sentence transformers."""
-    model = SentenceTransformer(model_name)
-    embedding1 = model.encode([text1])[0]
-    embedding2 = model.encode([text2])[0]
-    return np.dot(embedding1, embedding2) / (np.linalg.norm(embedding1) * np.linalg.norm(embedding2))
+def get_ngrams(text, n):
+    """Convert text into n-grams."""
+    tokens = nltk.word_tokenize(text.lower())
+    return list(ngrams(tokens, n))
 
-def evaluate_coverage(original_text, summary_text, similarity_threshold=0.5):
+def calculate_rouge_n(reference_text, summary_text, n=1):
     """
-    Evaluate how well the summary covers the key phrases from the original text.
-    Returns a score between 0 and 1.
+    Calculate ROUGE-N score between reference and summary texts.
+    Args:
+        reference_text: The original text
+        summary_text: The summary to evaluate
+        n: The n-gram size (1 for unigrams, 2 for bigrams)
+    Returns:
+        Dictionary containing ROUGE precision, recall, and F1 scores
     """
-    # Extract key phrases from original text
-    key_phrases = extract_key_phrases(original_text)
+    # Get n-grams for both texts
+    ref_ngrams = Counter(get_ngrams(reference_text, n))
+    sum_ngrams = Counter(get_ngrams(summary_text, n))
     
-    if not key_phrases:
-        return {"keyphrase_coverage_score": 0.0}
+    # Find overlapping n-grams
+    overlap_ngrams = ref_ngrams & sum_ngrams
     
-    # Calculate coverage
-    covered_phrases = 0
-    for phrase in key_phrases:
-        max_similarity = max(calculate_semantic_similarity(phrase, sent) 
-                           for sent in summary_text.split('.'))
-        if max_similarity >= similarity_threshold:
-            covered_phrases += 1
+    # Calculate counts
+    overlap_count = sum(overlap_ngrams.values())
+    ref_count = sum(ref_ngrams.values())
+    sum_count = sum(sum_ngrams.values())
     
-    coverage_score = covered_phrases / len(key_phrases)
-    return {"keyphrase_coverage_score": coverage_score} 
+    # Calculate precision and recall
+    precision = overlap_count / sum_count if sum_count > 0 else 0
+    recall = overlap_count / ref_count if ref_count > 0 else 0
+    
+    # Calculate F1 score
+    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    
+    return {
+        f"rouge_{n}_precision": precision,
+        f"rouge_{n}_recall": recall,
+        f"rouge_{n}_f1": f1
+    }
+
+def evaluate_coverage(original_text, summary_text):
+    """
+    Evaluate coverage using ROUGE-1 and ROUGE-2 scores.
+    Returns combined scores dictionary.
+    """
+    # Calculate both ROUGE-1 and ROUGE-2 scores
+    rouge1_scores = calculate_rouge_n(original_text, summary_text, n=1)
+    rouge2_scores = calculate_rouge_n(original_text, summary_text, n=2)
+    
+    # Combine scores
+    coverage_scores = {
+        "keyphrase_coverage_score": rouge1_scores["rouge_1_f1"]  # Keep this key for compatibility
+    }
+    coverage_scores.update(rouge1_scores)
+    coverage_scores.update(rouge2_scores)
+    
+    return coverage_scores 
