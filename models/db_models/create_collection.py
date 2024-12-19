@@ -57,6 +57,7 @@ try:
         # Define the generative module
         # generative_config=wc.Configure.Generative.openai(),
     )
+    print("Collection created successfully!")
 
 finally:
     # Close the client connection when done
