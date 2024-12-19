@@ -1,17 +1,14 @@
 import weaviate
 import weaviate.classes as wvc
 import weaviate.classes.config as wc
-from dotenv import load_dotenv
-import certifi
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
-os.environ['SSL_CERT_FILE'] = certifi.where()
 
 # Define Weaviate Cloud URL and API Key
 wcd_url = os.getenv("WCD_URL")
 wcd_api_key = os.getenv("WCD_API_KEY")
-# openai_key = os.getenv("OPENAI_KEY")
 huggingface_key = os.getenv("HF_KEY")
 
 # Set the headers for Hugging Face API
@@ -27,8 +24,7 @@ headers = {
 client = weaviate.connect_to_weaviate_cloud(
     cluster_url=wcd_url,                                 
     auth_credentials=wvc.init.Auth.api_key(wcd_api_key),    
-    headers=headers,
-    additional_config={"verify_ssl": False}
+    headers=headers
 )
 
 try:
@@ -36,17 +32,10 @@ try:
         name="Sentences",
         properties=[
             wc.Property(name="sentence", data_type=wc.DataType.TEXT),
-            wc.Property(name="lecture_name", data_type=wc.DataType.TEXT),
-            wc.Propert(name="id", data_type=wc.DataType.INT)
+            wc.Property(name="lecture", data_type=wc.DataType.TEXT),
+            wc.Property(name="id", data_type=wc.DataType.TEXT),
         ],
-        # vectorizer_config=[
-        #     wc.Configure.NamedVectors.text2vec_openai(
-        #         name="sentence_vector",
-        #         source_properties=["sentence"],
-        #         model="text-embedding-3-small",
-        #         dimensions=3072
-        #     ),
-        # ],
+        # Define & configure the vectorizer module
         vectorizer_config=[
             wc.Configure.NamedVectors.text2vec_huggingface(
                 name="sentence_vector",
@@ -55,11 +44,21 @@ try:
                 dimensions=384  # Adjust based on the chosen model
             ),
         ],
+        # vectorizer_config=[
+        #     # Vectorize the movie title
+        #     wc.Configure.NamedVectors.text2vec_openai(
+        #         name="sentence", 
+        #         source_properties=["question"], 
+        #         # choosing openai model
+        #         model="text-embedding-3-large",
+        #         dimensions=1024
+        #     ),
+        # ],
+        # Define the generative module
+        # generative_config=wc.Configure.Generative.openai(),
     )
-    print("Collection 'Sentences' created successfully with hugging face vectorizer!")
-except Exception as e:
-    print(f"Error creating collection: {e}")
 
 finally:
+    # Close the client connection when done
     client.close()
 

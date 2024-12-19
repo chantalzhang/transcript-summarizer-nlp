@@ -9,14 +9,21 @@ load_dotenv()
 
 WCD_URL = os.getenv("WCD_URL")
 WCD_API_KEY = os.getenv("WCD_API_KEY")
+huggingface_key = os.getenv("HF_KEY")
+
+headers = {
+    "X-HuggingFace-Api-Key": huggingface_key,
+}
+
 
 # Weaviate Connection
 client = weaviate.connect_to_weaviate_cloud(
     cluster_url=WCD_URL,
     auth_credentials=wvc.Auth.api_key(WCD_API_KEY),
+    headers=headers
 )
 
-def create_sentence_collection(client, collection_name="raw_text_file_sentences"):
+def create_sentence_collection(client, collection_name="Sentences"):
     """
     Create a Weaviate collection for storing embeddings of sentences.
     """
