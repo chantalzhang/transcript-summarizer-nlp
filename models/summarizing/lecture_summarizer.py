@@ -1,18 +1,19 @@
 import os
 import json
-from transformers import BartTokenizer, BartForConditionalGeneration, AutoTokenizer, AutoModelForSeq2SeqLM
+import torch
+from transformers import BartTokenizer, BartForConditionalGeneration
+from dotenv import load_dotenv
 
-# Initialize the model and tokenizer
-# model_name = "facebook/bart-large-cnn"
-# tokenizer = BartTokenizer.from_pretrained(model_name)
-# model = BartForConditionalGeneration.from_pretrained(model_name)
-model_name = "t5-base"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+load_dotenv()
 
-# Directory paths
+# Load DistilBART model and tokenizer
+model_name = "sshleifer/distilbart-cnn-12-6"
+tokenizer = BartTokenizer.from_pretrained(model_name)
+model = BartForConditionalGeneration.from_pretrained(model_name).to("cuda" if torch.cuda.is_available() else "cpu")
+
+# Data paths
 data_paths = {
-    "B": "../dataset/preprocessed/B/30",  # Chunk-level
+    "C": "../../dataset/preprocessed/C",  # Chunk-level
 }
 
 def load_preprocessed_data(directory):
@@ -48,23 +49,14 @@ def split_into_chunks(text, max_tokens=1024):
 
     return chunks
 
-def summarize_with_bart(text, max_length=150, min_length=50):
+def summarize_text_distilbart(text, max_length=150):
     """
-    Summarize text using the summarization model.
+    Summarize text using the DistilBART model.
     """
-    inputs = tokenizer(
-        text,
-        truncation=True,
-        max_length=1024, 
-        padding="longest",
-        return_tensors="pt"
-    )
+    inputs = tokenizer(text, return_tensors="pt", max_length=1024, truncation=True).to(model.device)
     summary_ids = model.generate(
         inputs["input_ids"],
-        attention_mask=inputs["attention_mask"],
         max_length=max_length,
-        min_length=min_length,
-        length_penalty=2.0,
         num_beams=4,
         early_stopping=True
     )
@@ -79,21 +71,20 @@ def summarize_lecture_chunks(lecture_chunks):
         print("Summarizing chunk...")
         text_chunks = split_into_chunks(chunk)
         for text_chunk in text_chunks:
-            chunk_summary = summarize_with_bart(text_chunk)
+            chunk_summary = summarize_text_distilbart(text_chunk)
             chunk_summaries.append(chunk_summary)
-            chunk_summary += "\n"
 
     combined_summary = " ".join(chunk_summaries)
 
     # If the combined summary is too long, summarize it again
-    # if len(tokenizer.tokenize(combined_summary)) > 1024:
-    #     final_summary = summarize_with_bart(combined_summary)
-    # else:
-    final_summary = combined_summary
+    if len(tokenizer.tokenize(combined_summary)) > 1024:
+        final_summary = summarize_text_distilbart(combined_summary)
+    else:
+        final_summary = combined_summary
 
     return final_summary
 
-def process_and_save_summaries(data_paths, output_dir="summarized_lectures"):
+def process_and_save_summaries(data_paths, output_dir="summarized_lectures_distilbart"):
     """
     Process all JSON files in the data_paths, summarize lectures, and save results.
     """
@@ -119,4 +110,4 @@ def process_and_save_summaries(data_paths, output_dir="summarized_lectures"):
             print(f"Saved summary for lecture: {lecture_name} to {lecture_file_path}")
 
 # Run the summarization process
-process_and_save_summaries(data_paths, "summarized_lectures_t5")
+process_and_save_summaries(data_paths)

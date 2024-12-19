@@ -20,19 +20,23 @@ load_dotenv()
 #     torch_dtype="auto"
 # )
 
-access_token = os.getenv("HF_KEY_MISTRAL_V3")
-model_name = "mistralai/Mistral-7B-Instruct-v0.3"
-tokenizer = AutoTokenizer.from_pretrained(model_name, token=access_token)
-model = AutoModelForCausalLM.from_pretrained(
-    model_name,
-    token=access_token,
-    trust_remote_code=True,
-    device_map="auto",
-    torch_dtype=torch.float16  # Use FP16 instead of BF16
-)
+# access_token = os.getenv("HF_KEY_MISTRAL_V3")
+# model_name = "mistralai/Mistral-7B-Instruct-v0.3"
+# tokenizer = AutoTokenizer.from_pretrained(model_name, token=access_token)
+# model = AutoModelForCausalLM.from_pretrained(
+#     model_name,
+#     token=access_token,
+#     trust_remote_code=True,
+#     device_map="auto",
+#     torch_dtype=torch.float16  # Use FP16 instead of BF16
+# )
+
+model_name = "sshleifer/distilbart-cnn-12-6"
+tokenizer = BartTokenizer.from_pretrained(model_name)
+model = BartForConditionalGeneration.from_pretrained(model_name)
 
 data_paths = {
-    "B": "../dataset/preprocessed/B/30",  # Chunk-level
+    "C": "../dataset/preprocessed/C/30",  # Chunk-level
 }
 
 def load_preprocessed_data(directory):
