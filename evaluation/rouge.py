@@ -6,7 +6,7 @@ import glob
 scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
 
 original_dir = "../dataset/unprocessed/"
-summary_dir = "../dataset/summarized_lectures_bart/C/"
+summary_dir = "../dataset/summarized_lectures_distilbart/C"
 
 metrics = ['rouge1', 'rouge2', 'rougeL']
 precision_sum = {metric: 0 for metric in metrics}
@@ -16,7 +16,7 @@ file_count = 0
 
 for i in range(1, 23):
     original_file = os.path.join(original_dir, f"lec{i}.txt")
-    summary_file = os.path.join(summary_dir, f"lec{i}.txt")
+    summary_file = os.path.join(summary_dir, f"lec{i}_topics.txt")
 
     if not os.path.exists(original_file) or not os.path.exists(summary_file):
         print(f"Skipping lec{i}.txt: Missing file.")
